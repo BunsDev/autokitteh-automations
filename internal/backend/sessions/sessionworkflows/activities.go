@@ -32,6 +32,9 @@ const (
 	deactivateDrainedDeploymentActivityName = "deactivate_drained_deployment"
 	getDeploymentStateActivityName          = "get_deployment_state"
 	createSessionActivityName               = "create_session"
+	listStoreValuesActivityName             = "list_store_values"
+	getStoreValueActivityName               = "get_store_value"
+	mutateStoreValueActivityName            = "mutate_store_value"
 )
 
 func (ws *workflows) registerActivities() {
@@ -94,6 +97,33 @@ func (ws *workflows) registerActivities() {
 		ws.createSessionActivity,
 		activity.RegisterOptions{Name: createSessionActivityName},
 	)
+
+	ws.worker.RegisterActivityWithOptions(
+		ws.listStoreValuesActivity,
+		activity.RegisterOptions{Name: listStoreValuesActivityName},
+	)
+
+	ws.worker.RegisterActivityWithOptions(
+		ws.getStoreValueActivity,
+		activity.RegisterOptions{Name: getStoreValueActivityName},
+	)
+
+	ws.worker.RegisterActivityWithOptions(
+		ws.mutateStoreValueActivity,
+		activity.RegisterOptions{Name: mutateStoreValueActivityName},
+	)
+}
+
+func (ws *workflows) listStoreValuesActivity(ctx context.Context, pid sdktypes.ProjectID) ([]string, error) {
+	return ws.svcs.Store.List(authcontext.SetAuthnSystemUser(ctx), pid)
+}
+
+func (ws *workflows) getStoreValueActivity(ctx context.Context, pid sdktypes.ProjectID, keys []string) (map[string]sdktypes.Value, error) {
+	return ws.svcs.Store.Get(authcontext.SetAuthnSystemUser(ctx), pid, keys)
+}
+
+func (ws *workflows) mutateStoreValueActivity(ctx context.Context, pid sdktypes.ProjectID, key, op string, operands []sdktypes.Value) (sdktypes.Value, error) {
+	return ws.svcs.Store.Do(authcontext.SetAuthnSystemUser(ctx), pid, key, op, operands...)
 }
 
 func (ws *workflows) createSessionActivity(ctx context.Context, session sdktypes.Session) error {

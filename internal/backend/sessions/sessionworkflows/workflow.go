@@ -517,6 +517,9 @@ func (w *sessionWorkflow) run(wctx workflow.Context, l *zap.Logger) (prints []sd
 		IsDeploymentActive: w.isDeploymentActive(wctx),
 		Signal:             w.signal(wctx),
 		NextSignal:         w.nextSignal(wctx),
+		ListStoreValues:    w.listStoreValues(wctx),
+		GetStoreValue:      w.getStoreValue(wctx),
+		MutateStoreValue:   w.mutateStoreValue(wctx),
 	}
 
 	runID, err := newRunID()

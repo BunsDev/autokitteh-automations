@@ -58,6 +58,8 @@ import (
 	"go.autokitteh.dev/autokitteh/internal/backend/secrets"
 	"go.autokitteh.dev/autokitteh/internal/backend/sessions"
 	"go.autokitteh.dev/autokitteh/internal/backend/sessionsgrpcsvc"
+	"go.autokitteh.dev/autokitteh/internal/backend/store"
+	"go.autokitteh.dev/autokitteh/internal/backend/storegrpcsvc"
 	"go.autokitteh.dev/autokitteh/internal/backend/telemetry"
 	"go.autokitteh.dev/autokitteh/internal/backend/temporalclient"
 	"go.autokitteh.dev/autokitteh/internal/backend/triggers"
@@ -218,6 +220,7 @@ func makeFxOpts(cfg *Config, opts RunOptions) []fx.Option {
 		Component("builds", configset.Empty, fx.Provide(builds.New)),
 		Component("connections", configset.Empty, fx.Provide(connections.New)),
 		Component("deployments", deployments.Configs, fx.Provide(deployments.New)),
+		Component("store", configset.Empty, fx.Provide(store.New)),
 		Component("projects", configset.Empty, fx.Provide(projects.New)),
 		Component("projectsgrpcsvc", projectsgrpcsvc.Configs, fx.Provide(projectsgrpcsvc.New)),
 		Component(
@@ -285,18 +288,19 @@ func makeFxOpts(cfg *Config, opts RunOptions) []fx.Option {
 			}),
 		),
 		fx.Provide(func(s sdkservices.ServicesStruct) sdkservices.Services { return &s }),
-		fx.Invoke(authgrpcsvc.Init),
 		fx.Invoke(applygrpcsvc.Init),
+		fx.Invoke(authgrpcsvc.Init),
 		fx.Invoke(buildsgrpcsvc.Init),
 		fx.Invoke(connectionsgrpcsvc.Init),
 		fx.Invoke(deploymentsgrpcsvc.Init),
 		fx.Invoke(dispatchergrpcsvc.Init),
 		fx.Invoke(eventsgrpcsvc.Init),
-		fx.Invoke(usersgrpcsvc.Init),
-		fx.Invoke(orgsgrpcsvc.Init),
 		fx.Invoke(integrationsgrpcsvc.Init),
 		fx.Invoke(oauth.Init),
+		fx.Invoke(orgsgrpcsvc.Init),
 		fx.Invoke(projectsgrpcsvc.Init),
+		fx.Invoke(storegrpcsvc.Init),
+		fx.Invoke(usersgrpcsvc.Init),
 		fx.Invoke(func(z *zap.Logger, runtimes sdkservices.Runtimes, muxes *muxes.Muxes) {
 			sdkruntimessvc.Init(z, runtimes, muxes.Auth)
 		}),
